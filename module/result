@@ -1,0 +1,30 @@
+Making module in bin
+make[1]: Entering directory `/home/KHM/module/bin'
+make[2]: Entering directory `/usr/src/linux-3.0.4'
+  CC [M]  /home/KHM/module/bin/knldeps.o
+  CC [M]  /home/KHM/module/bin/modreg.o
+/home/KHM/module/bin/modreg.c:296: error: unknown field ‘ioctl’ specified in initializer
+/home/KHM/module/bin/modreg.c:296: warning: initialization from incompatible pointer type
+/home/KHM/module/bin/modreg.c:334: error: ‘RW_LOCK_UNLOCKED’ undeclared here (not in a function)
+/home/KHM/module/bin/modreg.c:335: error: ‘SPIN_LOCK_UNLOCKED’ undeclared here (not in a function)
+/home/KHM/module/bin/modreg.c:576: warning: type defaults to ‘int’ in declaration of ‘DECLARE_MUTEX’
+/home/KHM/module/bin/modreg.c:576: warning: parameter names (without types) in function declaration
+/home/KHM/module/bin/modreg.c: In function ‘khm_comms_read_proc’:
+/home/KHM/module/bin/modreg.c:599: error: ‘mutex’ undeclared (first use in this function)
+/home/KHM/module/bin/modreg.c:599: error: (Each undeclared identifier is reported only once
+/home/KHM/module/bin/modreg.c:599: error: for each function it appears in.)
+/home/KHM/module/bin/modreg.c: In function ‘khm_comms_write_proc’:
+/home/KHM/module/bin/modreg.c:646: error: ‘mutex’ undeclared (first use in this function)
+/home/KHM/module/bin/modreg.c: In function ‘khm_read_proc’:
+/home/KHM/module/bin/modreg.c:674: error: ‘mutex’ undeclared (first use in this function)
+/home/KHM/module/bin/modreg.c: In function ‘khm_write_proc’:
+/home/KHM/module/bin/modreg.c:727: error: ‘mutex’ undeclared (first use in this function)
+/home/KHM/module/bin/modreg.c: In function ‘splxmod_init’:
+/home/KHM/module/bin/modreg.c:1274: error: ‘struct proc_dir_entry’ has no member named ‘owner’
+/home/KHM/module/bin/modreg.c:1291: error: ‘struct proc_dir_entry’ has no member named ‘owner’
+make[3]: *** [/home/KHM/module/bin/modreg.o] Error 1
+make[2]: *** [_module_/home/KHM/module/bin] Error 2
+make[2]: Leaving directory `/usr/src/linux-3.0.4'
+make[1]: *** [modules] Error 2
+make[1]: Leaving directory `/home/KHM/module/bin'
+make: *** [module] Error 2

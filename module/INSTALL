@@ -1,0 +1,420 @@
+Kernel Hook Module (KHM) 
+Trend Micro ServerProtect for Linux 3.0
+
+
+============= 
+Introduction 
+=============
+
+Kernel Hook Module (KHM) is a kernel module for ServerProtect and it
+supports the real-time scan feature. You can use the same general procedure
+for building a kernel module to build the KHM on your Linux system. Command
+line examples are provided in this document.
+
+The following is an overview of the process: 
+Step 1. Determine your Linux kernel version and architecture 
+Step 2. Prepare the kernel source 
+Step 3. Configure the kernel source 
+Step 4. Build the KHM 
+Step 5. Test the KHM
+Step 6. Install the KHM 
+Step 7. Restart ServerProtect
+
+============ 
+Requirement 
+============
+
+To build the KHM successfully, you need the following: 
+o root access to the Linux system 
+o GCC 
+o GNU Make 
+o the corresponding kernel source and configuration file for your running
+  kernel 
+
+
+============= 
+Installation 
+=============
+
+Step 1. Determine your Linux kernel version and architecture
+--------------------------------------------------------------------------
+
+Use the following command to determine the kernel version of your Linux
+system:
+
+# uname -r
+
+This command returns a string (for example , "2.6.9-22.ELsmp"). In this
+document, replace "<Kernel Version>" with this string.
+
+Use the following command to determine the kernel architecture of your
+Linux system:
+
+# uname -m
+
+This command returns a string (typically, "i686" or "x86_64"). In this
+document, replace "<Arch>" with this string.
+
+Note: You can also obtain the same information on the Summary screen in the
+      ServerProtect Web console.
+
+
+Step 2. Prepare the kernel source
+--------------------------------------------------------------------------
+
+Make sure the configured kernel source is available on your Linux
+system. This section describes how to prepare the kernel source for the
+following Linux systems:
+
+o Red Hat Enterprise Linux
+o CentOS
+o SUSE Linux Enterprise Desktop/Server 
+o A Linux system you custom build
+
+To determine which distribution you are using, check the Summary screen in
+the ServerProtect Web console or display the /etc/issue file. The following
+command shows the content:
+
+# cat /etc/issue
+
+(a) For Red Hat Enterprise Linux and CentOS: 
+---------------------------------
+
+Make sure you have installed ONE of the following RPM packages:
+
+o kernel-devel 
+o kernel-hugemem-devel 
+o kernel-smp-devel
+o kernel-pae-devel
+o kernel-xen-devel
+
+Note: To check if you have already installed one of these packages, see #1
+      in Troubleshooting for more information.
+
+Type the following command to install the RPM package. The package you
+choose to install depends on your running kernel version.
+
+# rpm -ivh <rpm package name>
+
+Example: 
+If your running kernel version is "2.6.9-5.EL" and the kernel architecture
+is "i686", type the following:  
+# rpm -ivh kernel-devel-2.6.9-5.EL.i686.rpm
+
+If your running kernel version is "2.6.9-22.ELsmp" and the kernel
+architecture is "x86_64", type the following: 
+# rpm -ivh kernel-smp-devel-2.6.9-22.EL.x86_64.rpm
+
+In addition to using the command line, you can use one of the following
+methods to install the packages:
+
+o Linux desktop environment (for example in GNOME, click Application >
+  System Settings > Add/Remove Program).  
+o the up2date program
+
+(b) For SUSE Linux Enterprise Server/Desktop:
+---------------------------------------------
+
+Make sure you have installed the following RPM packages on your Linux
+system:
+
+o kernel-source 
+o kernel-syms
+
+Note: To check if you have already installed one of these packages, see #1
+      in Troubleshooting for more information.
+
+Type the following command to install the packages: 
+# rpm -ivh <rpm package name>
+
+For example: 
+If your running kernel version is "2.6.16.27-0.6-default", type the
+following:  
+# rpm -ivh kernel-source-2.6.16.27-0.6.i586.rpm 
+# rpm -ivh kernel-syms-2.6.16.27-0.6.i586.rpm
+
+You can also use the YaST tool to install the packages.
+
+(c) For the customized kernel you built yourself
+------------------------------------------------
+
+Make sure the kernel source is configured and prepared correctly with your
+running kernel version.
+
+Generally, you can do this by copying the configuration files from the
+/boot directory to the kernel source directory (eg. /usr/src/linux-<Kernel
+Version>) and type the "make oldconfig" and "make modules_prepare"
+commands:
+
+# cp /boot/config-<Kernel Version> /usr/src/linux-<Kernel Version>/.config
+# cd /usr/src/linux-<Kernel Version> 
+# make oldconfig 
+# make modules_prepare
+
+
+Step 3. Configure the kernel source
+--------------------------------------------------------------------------
+
+In order to reduce the size of the compiled KHM, Trend Micro recommends not
+selecting the "Compile the kernel with debug info" option in the "Kernel
+Hacking" menu for kernel configuration.
+
+You can find your kernel source in the following directory:
+
+# cd /lib/modules/<Kernel Version>/build
+
+Then, type the following command in your kernel source directory to display
+the configuration UI.
+
+# make menuconfig
+
+In the "Kernel Hacking" menu, locate the item "Compile the kernel with
+debug info". If an asterisk appears before this item, press "N" on the
+keyboard to clear the asterisk. Then exit the configuration UI and save the
+settings.
+
+CAUTION: Clear only the "Compile the kernel with debug info" option in the
+         configuration UI. Do NOT change other options; otherwise you may
+         encounter kernel panic while using the KHM.
+
+Note: If you experience problems using the "make menuconfig" command, the
+      "ncurses" package may not be installed in your Linux system.  Do one
+      of the following:
+
+      o Install the package - you can obtain the package from the Linux
+        installation CD or download it from your Linux vendor's web site.
+
+      o Modify the .config file in the kernel source directory - change
+        "CONFIG_DEBUG_INFO=y" to "CONFIG_DEBUG_INFO=n" in the file.
+
+
+After the configuration, type the following command to prepare the source
+for kernel module compilation:
+
+# make modules_prepare
+
+
+Step 4. Build the KHM
+--------------------------------------------------------------------------
+
+IMPORTANT: For x86_64 architecture, if the build process is not successful,
+           see #6 and #7 in Troubleshooting for more information.
+
+Go to the directory where the KHM source is located (the default location
+is /opt/TrendMicro/SProtectLinux/SPLX.module/src/module).
+
+Use the make command to generate a new KHM.
+
+# cd /opt/TrendMicro/SProtectLinux/SPLX.module/src/module 
+# make
+
+You can ignore the warning messages during the build process. If the build
+process is successful, a KHM with the file name splxmod-<Kernel
+Version>.<Arch>.o will be generated in the bin directory.
+
+
+Step 5. Test the KHM
+--------------------------------------------------------------------------
+Note: Trend Micro recommends performing this KHM test before installing it 
+      to your computer. This prevents you from installing a non-working KHM 
+      in your Linux computer, causing the computer to hang after every 
+      system reboot.
+
+Before you perform the KHM test, stop the ServerProtect services.
+
+# /etc/init.d/splx stop
+
+Type the following command to perform a basic functional test for the KHM
+you have just built. This test should take less than 5 seconds. If the test
+takes longer than 5 seconds, this indicates that your system has stopped
+responding.
+  
+# make test
+
+CAUTION: This test script will only perform basic tests to ensure that the
+         KHM MAY work. A successful test result does NOT guarantee that the
+         KHM can work properly under all circumstances. During the KHM
+         test, your system may hang or you may experience a kernel panic.
+         Trend Micro recommends performing this operation on a test
+         computer.
+
+Refer to #5 in Troubleshooting for more information if: 
+o your Linux computer stops responding during the KHM test 
+o the KHM fails the test (in this case, do not install the KHM)
+
+
+Step 6. Install the KHM
+--------------------------------------------------------------------------
+
+If the compiled KHM passed the test successfully, you can install it by
+typing the install script:
+
+# make install
+
+This will copy the compiled KHM into the
+/opt/TrendMicro/SProtectLinux/SPLX.module directory. If there is already a
+KHM with the same name in that directory, the original file will
+automatically be renamed with a ".bak" suffix.
+
+If your Linux computer stops responding after a system reboot, see #8 in
+Troubleshooting for more information.
+
+
+Step 7. Restart ServerProtect
+--------------------------------------------------------------------------
+
+Restart ServerProtect to use the newly installed KHM:
+
+# /etc/init.d/splx restart
+
+
+================ 
+Troubleshooting 
+================
+
+1. What should I do if the "make" program prompts me to install the kernel
+   source package or kernel object package?
+
+Make sure you have completed Step 2 in the Installation section
+correctly. To check if the required RPM packages are already installed,
+type the following command:
+
+# rpm -q <rpm package name>
+
+If a required package is not installed, obtain the package from your Linux
+vendor's website or the installation source (such as CD-ROMs) and install
+it.
+
+
+2. I am using a kernel which is I custom built and I have the kernel
+   source, but the "Unable to locate source package" message still displays
+   after I typed the "make" command.
+
+You can try copying your kernel source or creating symbolic links to the
+/usr/src/linux-<Kernel Version> directory and try the "make" command again.
+
+
+3. The test program displays a "Cannot find ...  symbol in System.map"
+   message.
+
+For the KHM to work properly, it must obtain certain symbol addresses from
+/boot/System.map-<Kernel Version>. If this file is not found, the KHM will
+not work properly. If the file does not exist, you may need to rebuild your
+Linux kernel to get this file.
+
+
+4. What should I do if the KHM build process failed?
+
+First, visit the Trend Micro website to see if the KHM for your Linux
+system is available. If so, download the KHM to use it.
+
+You can check if Trend Micro has updated the KHM source code on the Trend
+Micro website. Since the Linux kernel is updated regularly, Trend Micro
+will also update the KHM source code for it to work with the new Linux
+kernel.
+
+Since the KHM code is published under GPL, you can also try to fix the
+problem yourself by modifying the source code.
+
+5. What should I do if the test program report error message such as:
+   "lsmod: command not found"?
+
+Make sure the system environment variable $PATH includes the path to
+the requested command. If the path is not included and the lsmod 
+command is located in "/sbin", type the following: 
+
+#export PATH=$PATH:/sbin
+
+Note: Replace "sbin" with the path of the command. 
+
+6. What should I do if the test program crashes/hangs or if the "Cannot
+   remove KHM from kernel" message displays?
+
+First, reboot your system and then visit the Trend Micro website to see if
+the KHM for your Linux system is available. If so, just download the KHM to
+use it.
+
+You can check if Trend Micro has updated the KHM source code on the Trend
+Micro website. Since the Linux kernel is updated regularly, Trend Micro
+will also update the KHM source code for it to work with the new Linux
+kernel.
+
+Since the KHM code is published under GPL, you can also try to fix the
+problem yourself by modifying the source code.
+
+
+7. (For x86_64 architecture only) The "make" program displays a warning
+   message indicating that it was unable to locate a required .S source
+   file.
+
+If you have to build a KHM for systems with x86_64 architecture, you need
+two extra ASM files for the compilation process. We have provided the ASM
+files for kernel versions 2.6.9, 2.6.16, and 2.6.18. If you have a running
+kernel version other than these, you need to create your own ASM files by
+following the steps below:
+
+a. Make sure you have the kernel source for your running kernel. (For Red
+   Hat Enterprise Linux, the kernel-devel package is not enough.)
+
+b. In the /opt/TrendMicro/SProtectLinux/SPLX.module/src/module/bin/kernel
+   directory, create two new files with the name
+   "x86_64_execve_entry.<kernel version>.S" and "ia32_execve_entry.<Kernel
+   Version>.S."
+
+c. Type your code in these files based on the arch/x86_64/kernel/entry.S
+   and arch/x86_64/ia32/ia32entry.S files in your kernel source directory.
+   Follow the examples provided in the bin/kernel KHM source directory to
+   change the code in the files.
+
+
+8. (For x86_64 architecture only) The "make" process displays a warning
+   message indicating that it is unable to find the phys_base or
+   change_page_attr_addr in System.map.
+   
+For kernel versions later than 2.6.18 (eg. Red Hat Enterprise Linux 5), the
+kernel sets the sys_call_table memory page to read-only. In order to change
+the system call table attribute, some functions used are not exported in
+the kernel. The script in Makefile will try to locate the addresses of the
+two functions "phys_base" and "change_page_attr_addr" and add them in the
+bin/modreg.c file. The following shows the line examples:
+
+#define PHYS_BASE 0xffffffff8034ce78 
+#define CHANGE_PAGE_ATTR_ADDR 0xffffffff8007dd22
+
+Normally, these two addresses can be queried from the
+/boot/System.map-<Kernel Version> file with the following commands:
+
+# grep phys_base /boot/System.map-<Kernel Version> 
+# grep change_page_attr_addr /boot/System.map-<Kernel Version>
+
+If the "make" process warns that it is unable to find the addresses, please
+check if the System.map file corresponding to your running kernel exists in
+/boot/System.map-<Kernel Version>. If not, you may need to recompile your
+kernel to get this file.
+
+9. After installing the KHM, the Linux computer hangs after a system
+   reboot.
+
+This problem may be caused by the installed KHM that you have not tested to
+verify whether it can run properly in your Linux computer
+
+Follow the steps below to solve this problem: 
+
+a. Reboot your Linux computer and enter the "init 1" mode (you can do this 
+   by changing the kernel boot up parameter in the boot loader, such as
+   GRUB).    
+
+b. Type the following command to remove the KHM in the
+   /opt/TrendMicro/SProtectLinux/SPLX.module directory:
+
+   # rm /opt/TrendMicro/SProtectLinux/SPLX.module/splxmod-`uname -r`.
+     `uname -m`.o
+
+c. Reboot your computer again. The Linux system should start without any
+   problems. However, since there is no KHM installed, ServerProtect
+   real-time scan is not enabled. To enable real-time scan, build the KHM
+   again.
+
+To avoid this problem, Trend Micro recommends you perform "make test"
+before installing the newly built KHM.
+
