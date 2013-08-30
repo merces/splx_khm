@@ -23,16 +23,16 @@
 
 # Test will only do on suitable platform
 VERSION=`uname -r 2> /dev/null`
-if [ "${VERSION}" == "" ] ; then
+if [ "${VERSION}" = "" ] ; then
 	VERSION=`cat /proc/sys/kernel/osrelease 2> /dev/null`
-	if [ "${VERSION}" == "" ] ; then
+	if [ "${VERSION}" = "" ] ; then
 		echo "Unable to determine the running kernel version."
 		exit 1
 	fi;
 fi;
 
 ARCH=`uname -m 2> /dev/null`
-if [ "${ARCH}" == "" ] ; then
+if [ "${ARCH}" = "" ] ; then
 	echo "Unable to determine the running kernel architecture."
 	exit 1
 fi;
@@ -40,26 +40,23 @@ fi;
 # add by errik to check the release type
 if [ -f /etc/redhat-release ]; then
     DIST=RedHat
+elif [ -f /etc/asianux-release ]; then
+    DIST=RedHat
+elif [ -f /etc/SuSE-release ]; then
+    DIST=SuSE
+elif [ -f /etc/debian_version ]; then
+    DIST=Debian
 else
-  if [ -f /etc/asianux-release ]; then
-      DIST=RedHat
-  else
-      if [ -f /etc/SuSE-release ]; then
-          DIST=SuSE
-      else
-          echo "This package only supports RedHat, SuSE and Asianux\n"
-          exit 1
-      fi;
-  fi;
-fi;
+    echo "This package only supports RedHat, SuSE, Asianux and Debian\n"
+    exit 1
+fi
 # add end
-
 
 FAIL_FLAG=0
 
 # Prompt
 echo "Test Program for Kernel Hook Module"
-echo "=============================================="
+echo "======================="
 echo "Kernel Version: ${VERSION}"
 echo "Architecture:   ${ARCH}"
 echo "KHM file:       splxmod-${VERSION}.${ARCH}.o"
@@ -113,7 +110,7 @@ if [ -a /boot/System.map-${VERSION} ]; then
 	echo -n "Obtaining sys_call_table address... "
 	SCT_ADDR=`grep " sys_call_table" /boot/System.map-${VERSION} \
         | cut -d " " -f 1`
-	if [ "${SCT_ADDR}" == "" ]; then
+	if [ "${SCT_ADDR}" = "" ]; then
 		echo "not found"
 		echo "Unable to locate sys_call_table symbol in System.map."
 		exit 1
@@ -123,7 +120,7 @@ if [ -a /boot/System.map-${VERSION} ]; then
 	echo -n "Obtaining do_execve address... "
 	EXEC_ADDR=`grep " do_execve$" /boot/System.map-${VERSION} \
         | cut -d " " -f 1`
-	if [ "${EXEC_ADDR}" == "" ]; then
+	if [ "${EXEC_ADDR}" = "" ]; then
 		echo "not found"
 		echo "Unable to locate do_execve symbol in System.map."
 		exit 1
@@ -131,11 +128,11 @@ if [ -a /boot/System.map-${VERSION} ]; then
 		echo ${EXEC_ADDR}
 	fi
 
-	if [ "${ARCH}" == "x86_64" ] ; then
+	if [ "${ARCH}" = "x86_64" ] ; then
 		echo -n "Obtaining int_ret_from_sys_call address... "
 		RET_ADDR=`grep " int_ret_from_sys_call" /boot/System.map-${VERSION} \
         | cut -d " " -f 1`
-		if [ "${RET_ADDR}" == "" ]; then
+		if [ "${RET_ADDR}" = "" ]; then
 			echo "not found"
 			echo "Unable to obtain int_ret_from_sys_call symbol in System.map."
 			exit 1
@@ -145,7 +142,7 @@ if [ -a /boot/System.map-${VERSION} ]; then
                 echo -n "Obtaining ia32_sys_call_table address... "
                 IA32_SCT_ADDR=`grep " ia32_sys_call_table" /boot/System.map-${VERSION} \
         | cut -d " " -f 1`
-                if [ "${IA32_SCT_ADDR}" == "IA32_SCT_ADDR" ]; then
+                if [ "${IA32_SCT_ADDR}" = "IA32_SCT_ADDR" ]; then
                         echo "not found"
                         echo "Unable to obtain ia32_sys_call_table symbol in System.map."
                         exit 1
@@ -155,7 +152,7 @@ if [ -a /boot/System.map-${VERSION} ]; then
                 echo -n "Obtaining compat_do_execve address... "
                 IA32_EXEC_ADDR=`grep " compat_do_execve" /boot/System.map-${VERSION} \
         | cut -d " " -f 1`
-                if [ "${IA32_EXEC_ADDR}" == "" ]; then
+                if [ "${IA32_EXEC_ADDR}" = "" ]; then
                         echo "not found"
                         echo "Unable to obtain compat_do_execve symbol in System.map."
                         exit 1
@@ -175,15 +172,15 @@ fi;
 
 echo -n "Locating any duplicated KHM in kernel... "
 MOD=`lsmod | grep splxmod`
-if [ "${MOD}" == "" ]; then
+if [ "${MOD}" = "" ]; then
 	echo "not found"
 	echo -n "Inserting KHM into kernel... "
-	if [ "${ARCH}" == "x86_64" ] ; then
+	if [ "${ARCH}" = "x86_64" ] ; then
 		insmod bin/splxmod-${VERSION}.${ARCH}.o splxmod_addr=0x${SCT_ADDR} splxmod_debug=2 splxmod_execve_addr=0x${EXEC_ADDR} splxmod_ret_addr=0x${RET_ADDR} splxmod_ia32_addr=0x${IA32_SCT_ADDR} splxmod_compat_do_execve_addr=0x${IA32_EXEC_ADDR} > /dev/null 2>&1
 	else
 		insmod bin/splxmod-${VERSION}.${ARCH}.o splxmod_addr=0x${SCT_ADDR} splxmod_debug=2 splxmod_execve_addr=0x${EXEC_ADDR} > /dev/null 2>&1
 	fi;
-	if [ $? == "0" ] ; then
+	if [ $? = "0" ] ; then
 		echo "success"
 	else
 		echo "failed"
@@ -201,7 +198,7 @@ fi;
 echo -n "Creating SPLX device node... "
 rm -rf /dev/splxdev
 mknod --mode=640 /dev/splxdev c `grep splxdev /proc/devices  | cut -d " " -f 1` 0
-if [ $? == "0" ] ; then
+if [ $? = "0" ] ; then
 	echo "success"
 else
 	echo "failed"
@@ -209,15 +206,15 @@ else
 	FAIL_FLAG=1
 fi;
 
-if [ "$FAIL_FLAG" == "0" ] ; then
+if [ "$FAIL_FLAG" = "0" ] ; then
 	echo -n "Running test program... "
 	dmesg -c > /dev/null
 	./testhelper.${DIST}.${ARCH} > /dev/null 2>&1
-	if [ $? == "0" ] ; then
+	if [ $? = "0" ] ; then
 		echo "success"
 		echo -n "Testing system call hook operation: 'open'... "
 		TEST_VALUE=`dmesg | grep "hooked __NR_open"`
-		if [ "${TEST_VALUE}" == "" ]; then
+		if [ "${TEST_VALUE}" = "" ]; then
 			echo "failed"
 			FAIL_FLAG=1
 		else
@@ -225,7 +222,7 @@ if [ "$FAIL_FLAG" == "0" ] ; then
 		fi;
 		echo -n "Testing system call hook operation: 'close'... "
 		TEST_VALUE=`dmesg | grep "hooked __NR_close"`
-		if [ "${TEST_VALUE}" == "" ]; then
+		if [ "${TEST_VALUE}" = "" ]; then
 			echo "failed"
 			FAIL_FLAG=1
 		else
@@ -233,7 +230,7 @@ if [ "$FAIL_FLAG" == "0" ] ; then
 		fi;
 		echo -n "Testing system call hook operation: 'execve'... "
 		TEST_VALUE=`dmesg | grep "hooked __NR_execve"`
-		if [ "${TEST_VALUE}" == "" ]; then
+		if [ "${TEST_VALUE}" = "" ]; then
 			echo "failed"
 			error_message=`dmesg | grep "\[Fatal\]"`
 			echo  "$error_message"
@@ -251,7 +248,7 @@ fi;
 # Try to rmmod
 echo -n "Removing KHM from kernel... "
 rmmod splxmod > /dev/null
-if [ $? == "0" ] ; then
+if [ $? = "0" ] ; then
 	echo "success"
 else
 	echo "failed"
@@ -260,7 +257,7 @@ else
 fi;
 
 # Test success
-if [ "$FAIL_FLAG" == "0" ] ; then
+if [ "$FAIL_FLAG" = "0" ] ; then
 	echo 
 	echo -ne "\033[32;1mTest successful.\033[0m\n"
 	echo -ne "You can type \"make install\" to install the KHM on your Linux system.\n"

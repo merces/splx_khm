@@ -41,16 +41,16 @@ module:
 	VERSION=`echo $$version |  awk '{split($$0,release,"-");print release[1]}' | awk '{split($$0,release,".");print release[1]"."release[2]"."release[3]}'` ; \
 	PL=`echo $$VERSION | awk '{split($$0,release,".");print release[3]}'` ; \
 	MV=`echo $$VERSION | awk '{split($$0,release,".");print release[1]}'` ; \
-	if [ "`echo $$version | grep xen -`" == "" ] ; then \
+	if [ "`echo $$version | grep xen -`" = "" ] ; then \
 		XEN="" ; \
 	else \
 		XEN="xen." ; \
 	fi; \
-	if [ "$$arch" == "x86_64" ] ; then \
+	if [ "$$arch" = "x86_64" ] ; then \
 		echo -e "Kernel VERSION = $$VERSION" ; \
-		if [ "$$MV" == "2" ]; then \
+		if [ "$$MV" = "2" ]; then \
 			echo "Copy files"; \
-			if [ -a bin/kernel/x86_64_execve_entry.$$VERSION.$${XEN}S ] ; then \
+			if [ -f bin/kernel/x86_64_execve_entry.$$VERSION.$${XEN}S ] ; then \
 			( cp -f bin/kernel/x86_64_execve_entry.$$VERSION.$${XEN}S bin/x86_64_execve_entry.S ) ;  \
 			( cp -f bin/kernel/ia32_execve_entry.$$VERSION.S bin/ia32_execve_entry.S ) ;  \
 			else \
@@ -60,9 +60,9 @@ module:
 		fi; \
 		arch=X86_64 ; \
 		if [ "$$PL" -eq "18" ] ; then \
-			if [ "$$XEN" == "" ] ; then \
+			if [ "$$XEN" = "" ] ; then \
 			PHYSBASE=`grep " phys_base" /boot/System.map-$$version | cut -d " " -f 1` ; \
-				if [ "$${PHYSBASE}" == "" ] ; then \
+				if [ "$${PHYSBASE}" = "" ] ; then \
 					echo "Unable to locate phys_base symbol in System.map. " ; \
 					echo "Please check the INSTALL file for troubleshooting."; \
 					exit 1; \
@@ -71,7 +71,7 @@ module:
 				fi; \
 			fi; \
 			CPAA=`grep " change_page_attr_addr" /boot/System.map-$$version | cut -d " " -f 1` ; \
-			if [ "$${CPAA}" == "" ] ; then \
+			if [ "$${CPAA}" = "" ] ; then \
 				echo "Unable to locate change_page_attr_addr symbol in System.map. " ; \
 				echo "Please check the INSTALL file for troubleshooting."; \
 				exit 1; \
@@ -83,22 +83,22 @@ module:
 		arch=I686 ; \
 	fi; \
 	kernel_source="/lib/modules/$$version/source"; \
-	if ! [ -a "$$kernel_source/include/linux/kernel.h"  ] ; then \
+	if ! [ -f "$$kernel_source/include/linux/kernel.h"  ] ; then \
 		kernel_source="/usr/src/linux-$$version" ; \
-	    if ! [  -a "$$kernel_source/include/linux/kernel.h"  ] ; then \
+	    if ! [  -f "$$kernel_source/include/linux/kernel.h"  ] ; then \
 	      kernel_source="/usr/src/linux" ; \
-	      if ! [  -a "$$kernel_source/include/linux/kernel.h"  ] ; then \
+	      if ! [  -f "$$kernel_source/include/linux/kernel.h"  ] ; then \
 	        echo -ne "Unable to locate the Linux kernel source. \nPlease put your configured kernel source in /usr/src/linux-$$version \n"; \
 			exit 0 ; \
 	      fi ; \
 	    fi ; \
 	fi ;\
 	kernel_obj="/lib/modules/$$version/build"; \
-	if ! [ -a "$$kernel_obj/include/linux/version.h" -o -a "$$kernel_obj/include/linux/autoconf.h" ] ; then \
+	if ! [ -f "$$kernel_obj/include/linux/version.h" -o -f "$$kernel_obj/include/linux/autoconf.h" ] ; then \
 		kernel_obj="/usr/src/linux-$$version" ; \
-		if ! [ -a "$$kernel_obj/include/linux/version.h" -o -a "$$kernel_obj/include/linux/autoconf.h" ] ; then \
+		if ! [ -f "$$kernel_obj/include/linux/version.h" -o -f "$$kernel_obj/include/linux/autoconf.h" ] ; then \
 	      kernel_obj="/usr/src/linux" ; \
-	      if ! [ -a "$$kernel_obj/include/linux/version.h" -o -a "$$kernel_obj/include/linux/autoconf.h" ] ; then \
+	      if ! [ -f "$$kernel_obj/include/linux/version.h" -o -f "$$kernel_obj/include/linux/autoconf.h" ] ; then \
 	          echo -ne "Unable to locate the Linux kernel object files or kernel source is not \nconfigured. \nPlease put your configured kernel source in /usr/src/linux-$$version \n"; \
 			exit 0 ; \
 	      fi ; \
@@ -106,7 +106,7 @@ module:
 	fi ;\
 	target=`echo $@`; \
 	list='$(SUBDIRS)'; \
-	if [ $$MV == "2" ]; then \
+	if [ $$MV = "2" ]; then \
 		for subdir in $$list; do \
 			echo "Making $$target in $$subdir"; \
 			(cd $$subdir && $(MAKE) PL=$$PL KERNEL=2.6 MODULE_SRC=$(shell pwd)/bin KERNEL_VERSION=$$version DIST_ARCH=$$arch DIST=$(DIST) KERNEL_SRC=$$kernel_obj) ; \
@@ -129,18 +129,18 @@ clean:
 .PHONY: test
 test: 
 	@./test.sh ;  \
-	if [ $$? == "0" ] ; then \
+	if [ $$? = "0" ] ; then \
 		echo "" ; \
 	else \
-	echo -e "\033[31;1mTest unsuccessful.\033[0m" ; \
+	echo "\033[31;1mTest unsuccessful.\033[0m" ; \
 	fi;
 
 .PHONY: install
 install:
 	@version=`uname -r`; arch=`uname -m`; \
-	if [ -a bin/splxmod-$$version.$$arch.o ] ; then \
+	if [ -f bin/splxmod-$$version.$$arch.o ] ; then \
 		echo -n "Copying bin/splxmod-$$version.$$arch.o ... " ; \
-		if [ -a /opt/TrendMicro/SProtectLinux/SPLX.module/splxmod-$$version.$$arch.o ] ; then \
+		if [ -f /opt/TrendMicro/SProtectLinux/SPLX.module/splxmod-$$version.$$arch.o ] ; then \
 			mv -f /opt/TrendMicro/SProtectLinux/SPLX.module/splxmod-$$version.$$arch.o /opt/TrendMicro/SProtectLinux/SPLX.module/splxmod-$$version.$$arch.o.bak ; \
 		fi ; \
 		cp -rf bin/splxmod-$$version.$$arch.o /opt/TrendMicro/SProtectLinux/SPLX.module ; \

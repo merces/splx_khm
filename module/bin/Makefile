@@ -129,41 +129,41 @@ EXTRA_CFLAGS += -I$(MODULE_SRC)/../include -I$(MODULE_SRC)/../../common/include 
 endif
 
 modules:
-	@if [ -a /etc/asianux-release ] ; then \
+	@if [ -f /etc/asianux-release ] ; then \
         grep "Trinity" /etc/asianux-release > /dev/null 2>&1 ; \
-        if [ "$$?" == "0" ] ; then \
+        if [ "$$?" = "0" ] ; then \
             OS="ASIANUX2" ; \
         else \
             grep "Quartet" /etc/asianux-release > /dev/null 2>&1 ; \
-            if [ "$$?" == "0" ] ; then \
+            if [ "$$?" = "0" ] ; then \
                 OS="ASIANUX3" ; \
             else \
                 OS="OTHER"; \
             fi; \
         fi; \
-	elif [ -a /etc/redhat-release ] ; then \
+	elif [ -f /etc/redhat-release ] ; then \
 	grep "Nahant" /etc/redhat-release > /dev/null 2>&1 ; \
-	if [ "$$?" == "0" ] ; then \
+	if [ "$$?" = "0" ] ; then \
 	    OS="RHEL4" ; \
 	else \
 	    grep "Tikanga" /etc/redhat-release > /dev/null 2>&1 ; \
-	    if [ "$$?" == "0" ] ; then \
+	    if [ "$$?" = "0" ] ; then \
 		OS="RHEL5" ; \
 	    else \
 		grep "CentOS release 4" /etc/redhat-release > /dev/null 2>&1 ; \
-		if [ "$$?" == "0" ] ; then \
+		if [ "$$?" = "0" ] ; then \
 		   OS="CentOS4"; \
 		else \
 		   grep "CentOS release 5" /etc/redhat-release > /dev/null 2>&1 ; \
-		   if [ "$$?" == "0" ] ; then \
+		   if [ "$$?" = "0" ] ; then \
 		       OS="CentOS5"; \
 		   else \
 		       grep "Santiago" /etc/redhat-release > /dev/null 2>&1 ; \
-		       if [ "$$?" == "0" ] ; then \
+		       if [ "$$?" = "0" ] ; then \
 		           OS="RHEL6" ; \
 		       else \
 		           grep "CentOS Linux release 6" /etc/redhat-release > /dev/null 2>&1 ; \
-		           if [ "$$?" == "0" ] ; then \
+		           if [ "$$?" = "0" ] ; then \
 		               OS="CentOS6"; \
 		           else \
 			           OS="OTHER"; \
@@ -173,13 +173,13 @@ modules:
 		fi; \
 	    fi; \
 	fi; \
-	elif [ -a /etc/SuSE-release ] ; then \
+	elif [ -f /etc/SuSE-release ] ; then \
 	grep "11" /etc/SuSE-release > /dev/null 2>&1 ; \
-	if [ "$$?" == "0" ] ; then \
+	if [ "$$?" = "0" ] ; then \
 		OS="SUSE11" ; \
 	else \
 		grep "10" /etc/SuSE-release> /dev/null 2>&1 ; \
-		if [ "$$?" == "0" ] ; then \
+		if [ "$$?" = "0" ] ; then \
 		    OS="SUSE10"; \
 		else \
 		    OS="OTHER" ; \
@@ -191,6 +191,6 @@ modules:
 
 .PHONY: clean
 clean:
-	@rm -rf  .tmp_versions .*.o.d .*.o.cmd .*.cmd *.mod.c *.mod.o $(obj-m) $(splxmod-objs) *.o Module.symvers
+	@rm -rf  .tmp_versions .*.o.d .*.o.cmd .*.cmd *.mod.c *.mod.o $(obj-m) $(splxmod-objs) *.o Module.symvers modules.order
 
 endif

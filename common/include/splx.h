@@ -140,11 +140,11 @@ typedef struct denywrite_item {
 #define	INCOMING_DEF	TRUE
 #define	OUTGOING_DEF	TRUE
 #define	RUNNING_DEF	TRUE
-#define	DIRS_DEF	NULL
+#define	DIRS_DEF	""
 #define	EXTS_DEF	"BIN:COM:DOC:DOT:DRV:EXE:SYS:XLS:XLA:XLT:VBS:JS:HTML:HTM:CLA:CLASS:SCR:MDB:PPT:POT:DLL:OCX:OVL"
 #define	EXC_DIRS_DEF	"/dev:/proc:/var/spool/mail:/var/mail:/var/spool/mqueue:/var/spool/mqueue.iscan:/opt/TrendMicro/SProtectLinux/SPLX.Quarantine:/opt/TrendMicro/SProtectLinux/SPLX.Backup"
-#define	EXC_FILS_DEF	NULL
-#define	EXC_EXTS_DEF	NULL
+#define	EXC_FILS_DEF	""
+#define	EXC_EXTS_DEF	""
 /* default values for internal settings */
 #define DEBUG_LEVEL_DEF		0
 #define MAX_CACHE_ITEM_DEF	96

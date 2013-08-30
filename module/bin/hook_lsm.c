@@ -59,10 +59,10 @@
 #include "splxmod.h"
 #include "hook_lsm.h"
 
-
 #ifdef USE_LSM_HOOK
 #define DEFAULT_SECURITY_ADDR_NAME "default_security_ops"
 #define SECURITY_ADDR_NAME         "security_ops"
+#include <linux/kallsyms.h>
 
 //Address of "security_ops"
 static void ** p_security_ops_addr = NULL;
@@ -360,6 +360,7 @@ inline void splx_unregister_security(void)
  * @str: a substring of one line that we found in "find_symbol_addr"
  */
 
+/*
 static unsigned int symbol_len(const char * str)
 {
     unsigned int i = 0;
@@ -375,12 +376,16 @@ static unsigned int symbol_len(const char * str)
 
     return i;
 }
+*/
+
 /*
  * Convert the hex_str string to unsigned long
  * Refer to kernel API simple_strtoul
  * ffffffff81f22eb0 b security_ops
  * @hex_str: A line read from /proc/kallsyms
  */
+
+/*
 static 
 unsigned long simple_hex_strtoul(const char* hex_str)
 {
@@ -405,11 +410,14 @@ unsigned long simple_hex_strtoul(const char* hex_str)
 
     return result;
 }
+*/
 
 /* 
  * find the symbol address from /proc/kallsyms
  * @sym - symbol string
  */
+
+/*
 static
 unsigned long find_symbol_addr(const char* sym)
 {
@@ -432,7 +440,7 @@ unsigned long find_symbol_addr(const char* sym)
 
     while(!stop)
     {
-        /*ssize_t (*read) (struct file *, char __user *, size_t, loff_t *);*/
+        //ssize_t (*read) (struct file *, char __user *, size_t, loff_t *);
         i = 0;
         memset(buffer, 0, 128);
         do {
@@ -459,30 +467,43 @@ unsigned long find_symbol_addr(const char* sym)
     fput(fp);
     return addr;
 }
+*/
 
-
-//The Interface to do execve Hook
+// The Interface to do execve Hook
+// Patch by fernando@mentebinaria.com.br to hook exevce in x86-64 arch
 bool hook_lsm(void)
 {
     const char * cpsMethod = "hook_lsm";
-    unsigned long addr1, addr2;
+    unsigned long func_addr = 0; // address of a exported LSM functions that uses default_security_ops pointer
+    unsigned long secops_addr;// = ULONG_MAX; // address of security_ops structure
+    //unsigned long secops_addr = 0xffffffffffffffff; // address of security_ops structure
     
     CP_DBG_LVL;
 
-    addr1 = find_symbol_addr(DEFAULT_SECURITY_ADDR_NAME);
-    addr2 = find_symbol_addr(SECURITY_ADDR_NAME);
-    
-    if(addr1 == 0 || addr2 == 0 )
+    func_addr = kallsyms_lookup_name("reset_security_ops");
+
+    if (!func_addr) 
+    {
+        DPRINTK(LOG_CLOSE, "%s: [Fatal] Lookup address for reset_security_ops failed. Can't enable execve Hook\n", cpsMethod);
+        return false;
+    }
+
+    secops_addr = func_addr; // only to retain the 0xffffffff prefix
+
+    // get security_ops pointer since its used inside reset_security_ops function
+    if (memcpy(&secops_addr, (void *) (func_addr + 7), 4) == NULL)
     {
         DPRINTK(LOG_CLOSE, "%s: [Fatal] Lookup address for security ops failed. Can't enable execve Hook\n", cpsMethod);
         return false;
     }
-    p_security_ops_addr = (void **)addr2;
-    p_default_security_ops_addr = (void **)addr1;
-    DPRINTK(LOG_DEBUG, "%s: Default security ops address [0x%lx], security ops value [0x%lx]\n", cpsMethod, (unsigned long)p_default_security_ops_addr
-        , (unsigned long)(*p_security_ops_addr));
+
+    p_security_ops_addr = (void *)secops_addr;
+    p_default_security_ops_addr = (void *)secops_addr;
+    DPRINTK(LOG_DEBUG, "%s: Default security ops address [0x%lx], security ops value [0x%lx]\n",
+            cpsMethod, (unsigned long)p_default_security_ops_addr, (unsigned long)(*p_security_ops_addr));
 
     //If another LMS has registerd, not do the hook.
+/*
     if(*p_security_ops_addr != (void *)p_default_security_ops_addr)
     {
         //Warning: Not remove the [Fatal] because make test will show the log
@@ -490,7 +511,7 @@ bool hook_lsm(void)
             cpsMethod, ((struct security_operations *)*p_security_ops_addr)->name);
         return false;
     }
-
+*/
     splx_security_ops = (struct security_operations *)splx_malloc(sizeof(struct security_operations));
     if(NULL == splx_security_ops)
     {

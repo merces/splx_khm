@@ -20,7 +20,7 @@
 
 #ifndef SPLXMOD_INFO_H
 #define SPLXMOD_INFO_H
-#define @@OS@@
+#define _linux
 #define @@ARCH@@
 
 /* for ioctl(SIOCGETKHMINFO) */

@@ -20,8 +20,8 @@
 
 #ifndef SPLXMOD_INFO_H
 #define SPLXMOD_INFO_H
-#define RHEL6
-#define I686
+#define _linux
+#define X86_64
 
 /* for ioctl(SIOCGETKHMINFO) */
 #ifdef SuSE
@@ -70,6 +70,6 @@
 #define MODINFO_DISTV "Other Linux"
 #endif
 #define DRIVER_AUTHOR "Trend Micro ServerProtect for Linux User"
-#define DRIVER_DESC "Kernel Hooking Module for ServerProtect for Linux (User Build) \n\t\tversion 3.0.1.0010      2013-03-15   16:33:28\n\t\t" MODINFO_DISTV " I686"
+#define DRIVER_DESC "Kernel Hooking Module for ServerProtect for Linux (User Build) \n\t\tversion 3.0.1.0010      2013-08-30   15:57:26\n\t\t" MODINFO_DISTV " X86_64"
 
 #endif
