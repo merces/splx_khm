@@ -1,21 +1,21 @@
-# Kernel Hook Module for Trend Micro ServerProtect for Linux  
-# Copyright (C) 2007 Trend Micro Incorporated.                
+# Kernel Hook Module for Trend Micro ServerProtect for Linux
+# Copyright (C) 2007 Trend Micro Incorporated.
 
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
 # the Free Software Foundation; either version 2 of the License, or
 # (at your option) any later version.
-# 
+#
 # This program is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU General Public License for more details.
-# 
+#
 # You should have received a copy of the GNU General Public License
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-# 
+#
 
 SUBDIRS = bin
 
@@ -31,7 +31,7 @@ DIST=RedHat
 all: module
 
 .PHONY: module
-module: 
+module:
 	@version=`uname -r`; \
 	if [ "`echo $$version | grep debug -`" != "" ] ; then \
 		echo -e "Unable to build the KHM on a debug kernel. Please use a non-debug kernel." ; \
@@ -83,24 +83,27 @@ module:
 		arch=I686 ; \
 	fi; \
 	kernel_source="/lib/modules/$$version/source"; \
-	if ! [ -f "$$kernel_source/include/linux/kernel.h"  ] ; then \
+	if [ ! -n "$(ls -A $$kernel_source/include/linux/)" -a ! -d "$$kernel_source/include/linux/" ] ; then \
 		kernel_source="/usr/src/linux-$$version" ; \
-	    if ! [  -f "$$kernel_source/include/linux/kernel.h"  ] ; then \
+	    if [ ! -n "$(ls -A $$kernel_source/include/linux/)" -a ! -d "$$kernel_source/include/linux/" ] ; then \
 	      kernel_source="/usr/src/linux" ; \
-	      if ! [  -f "$$kernel_source/include/linux/kernel.h"  ] ; then \
+	      if [ ! -n "$(ls -A $$kernel_source/include/linux/)" -a ! -d "$$kernel_source/include/linux/" ] ; then \
 	        echo -ne "Unable to locate the Linux kernel source. \nPlease put your configured kernel source in /usr/src/linux-$$version \n"; \
 			exit 0 ; \
 	      fi ; \
 	    fi ; \
 	fi ;\
 	kernel_obj="/lib/modules/$$version/build"; \
-	if ! [ -f "$$kernel_obj/include/linux/version.h" -o -f "$$kernel_obj/include/linux/autoconf.h" ] ; then \
+	if  [ ! -n "$( ls -A $$kernel_obj/include/linux/)" -a ! -d "$$kernel_obj/include/linux/" ] ; then \
 		kernel_obj="/usr/src/linux-$$version" ; \
-		if ! [ -f "$$kernel_obj/include/linux/version.h" -o -f "$$kernel_obj/include/linux/autoconf.h" ] ; then \
-	      kernel_obj="/usr/src/linux" ; \
-	      if ! [ -f "$$kernel_obj/include/linux/version.h" -o -f "$$kernel_obj/include/linux/autoconf.h" ] ; then \
-	          echo -ne "Unable to locate the Linux kernel object files or kernel source is not \nconfigured. \nPlease put your configured kernel source in /usr/src/linux-$$version \n"; \
-			exit 0 ; \
+			if [ ! -n "$( ls -A $$kernel_obj/include/linux/)" -a ! -d "$$kernel_obj/include/linux/" ] ; then \
+	      kernel_obj="/usr/src/kernels/$$version" ; \
+	      	if [ ! -n "$( ls -A $$kernel_obj/include/linux/)" -a ! -d "$$kernel_obj/include/linux/" ] ; then \
+						kernel_obj="/usr/src/linux" ; \
+							if [ ! -n "$( ls -A $$kernel_obj/include/linux/)" -a ! -d "$$kernel_obj/include/linux/" ] ; then \
+		          echo -ne "Unable to locate the Linux kernel object files or kernel source is not \nconfigured. \nPlease put your configured kernel source in /usr/src/linux-$$version \n"; \
+				exit 0 ; \
+				  fi; \
 	      fi ; \
 	    fi ; \
 	fi ;\
@@ -127,7 +130,7 @@ clean:
 	done; \
 
 .PHONY: test
-test: 
+test:
 	@./test.sh ;  \
 	if [ $$? = "0" ] ; then \
 		echo "" ; \
@@ -147,4 +150,4 @@ install:
 		echo "OK" ; \
 	else \
 		echo "Unable to locate KHM. Please build the KHM before installing it." ; \
-	fi; 
+	fi;
