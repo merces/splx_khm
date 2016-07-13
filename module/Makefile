@@ -83,24 +83,24 @@ module:
 		arch=I686 ; \
 	fi; \
 	kernel_source="/lib/modules/$$version/source"; \
-	if [ -n "$(ls -A $$kernel_source/include/linux/)" -a -d "$$kernel_source/include/linux/" ] ; then \
+	if [ ! -n "$(ls -A $$kernel_source/include/linux/)" -a ! -d "$$kernel_source/include/linux/" ] ; then \
 		kernel_source="/usr/src/linux-$$version" ; \
-	    if [ -n "$(ls -A $$kernel_source/include/linux/)" -a -d "$$kernel_source/include/linux/" ] ; then \
+	    if [ ! -n "$(ls -A $$kernel_source/include/linux/)" -a ! -d "$$kernel_source/include/linux/" ] ; then \
 	      kernel_source="/usr/src/linux" ; \
-	      if [ -n "$(ls -A $$kernel_source/include/linux/)" -a -d "$$kernel_source/include/linux/" ] ; then \
+	      if [ ! -n "$(ls -A $$kernel_source/include/linux/)" -a ! -d "$$kernel_source/include/linux/" ] ; then \
 	        echo -ne "Unable to locate the Linux kernel source. \nPlease put your configured kernel source in /usr/src/linux-$$version \n"; \
 			exit 0 ; \
 	      fi ; \
 	    fi ; \
 	fi ;\
 	kernel_obj="/lib/modules/$$version/build"; \
-	if [ -n "$( ls -A $$kernel_obj/include/linux/)" -a -d "$$kernel_obj/include/linux/" ] ; then \
+	if  [ ! -n "$( ls -A $$kernel_obj/include/linux/)" -a ! -d "$$kernel_obj/include/linux/" ] ; then \
 		kernel_obj="/usr/src/linux-$$version" ; \
-			if [ -n "$( ls -A $$kernel_obj/include/linux/)" -a -d "$$kernel_obj/include/linux/" ] ; then \
+			if [ ! -n "$( ls -A $$kernel_obj/include/linux/)" -a ! -d "$$kernel_obj/include/linux/" ] ; then \
 	      kernel_obj="/usr/src/kernels/$$version" ; \
-	      	if [ -n "$( ls -A $$kernel_obj/include/linux/)" -a -d "$$kernel_obj/include/linux/" ] ; then \
+	      	if [ ! -n "$( ls -A $$kernel_obj/include/linux/)" -a ! -d "$$kernel_obj/include/linux/" ] ; then \
 						kernel_obj="/usr/src/linux" ; \
-							if [ -n "$( ls -A $$kernel_obj/include/linux/)" -a -d "$$kernel_obj/include/linux/" ] ; then \
+							if [ ! -n "$( ls -A $$kernel_obj/include/linux/)" -a ! -d "$$kernel_obj/include/linux/" ] ; then \
 		          echo -ne "Unable to locate the Linux kernel object files or kernel source is not \nconfigured. \nPlease put your configured kernel source in /usr/src/linux-$$version \n"; \
 				exit 0 ; \
 				  fi; \
